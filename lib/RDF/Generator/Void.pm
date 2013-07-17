@@ -237,7 +237,11 @@ sub generate {
 	my $void_model = shift || RDF::Trine::Model->temporary_model;
 	local $progress = Progress::Any->get_indicator(task => "compute");
 	$progress->pos(0);
-	$progress->target($self->inmodel->size + 10);
+	my $target_size = 11;
+	if ($self->has_level && ($self->level > 0)) {
+		$target_size += $self->inmodel->size;
+	}
+	$progress->target($target_size);
 	$progress->update(message => "Adding base statements");
 	local $self->{void_model} = $void_model;
 
@@ -247,6 +251,7 @@ sub generate {
 													 $rdf->type,
 													 $void->Dataset,
 													));
+	$progress->update(message => "Adding base statements");
 
 	my ($scheme, $auth, $path, $query, $frag) = uri_split($self->dataset_uri->uri_value);
 	if ($frag) { # Then, we have a document that could be described with provenance
@@ -266,8 +271,8 @@ sub generate {
 		$void_model->add_statement(statement($release_uri,
 														 iri('http://www.w3.org/2000/01/rdf-schema#label'),
 													    literal("RDF::Generator::Void, Version $VERSION", 'en')));
+		$progress->update(message => "Adding provenance statements");
 	}
-	$progress->update(message => "Adding base statements");
 
 	foreach my $endpoint ($self->all_endpoints) {
 		$void_model->add_statement(statement(
@@ -293,6 +298,7 @@ sub generate {
 														));
 	}
 
+	$progress->update(message => "Adding user-set statements");
 
 	$void_model->add_statement(statement(
 													 $self->dataset_uri,
@@ -320,6 +326,10 @@ sub generate {
 	$self->_generate_most_common_vocabs($self->stats) if $self->has_stats;
 
 	return $void_model if ($self->has_level && $self->level <= 1);
+
+	$target_size += scalar(keys(%{$self->stats->propertyPartitions}));
+	$target_size += scalar(keys(%{$self->stats->classPartitions}));
+	$progress->target($target_size);
 
 	$self->_generate_propertypartitions;
 	$self->_generate_classpartitions;
