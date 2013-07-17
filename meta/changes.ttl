@@ -8,6 +8,17 @@
 
 my:project :release my:v_0-13_1, my:v_0-12, my:v_0_02, my:v_0_04, my:v_0_06, my:v_0_10 .
 
+my:v_0-13_1
+    a           :Version ;
+    dc:issued   "2013-07-17"^^xsd:date ;
+    rdfs:label "Progress bar."@en ;
+    :revision   "0.13_1"^^xsd:string ;
+    dcs:changeset [
+      dcs:item
+        [ rdfs:label "Add a progress bar when used as a command line tool."@en ; a dcs:Addition ] , 
+        [ rdfs:label "Fix DBD::SQlite problem with tempfile."@en ; a dcs:Bugfix ] 
+    ] .
+
 my:v_0-12
     a           :Version ;
     dc:issued   "2013-07-07"^^xsd:date ;
