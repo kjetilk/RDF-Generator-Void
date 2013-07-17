@@ -5,6 +5,11 @@ Created:      2012-06-15
 Bug tracker:  <https://github.com/kjetilk/RDF-Generator-Void/issues>
 Maintainer:   Kjetil Kjernsmo <mailto:kjetilk@cpan.org>
 
+0.13_1  2013-07-17  # Progress bar.
+
+ - (Addition) Add a progress bar when used as a command line tool.
+ - (Bugfix) Fix DBD::SQlite problem with tempfile.
+
 0.12  2013-07-07  # Some provenance and command line tool.
 
  - (Addition) Author tests changes.
