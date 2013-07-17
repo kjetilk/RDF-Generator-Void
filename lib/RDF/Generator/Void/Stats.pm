@@ -83,10 +83,8 @@ sub BUILD {
 	# Initialize local hashes to count stuff.
 	my (%vocab_counter, %entities, %properties, %subjects, %objects, %classes);
 	my $progress = Progress::Any->get_indicator(task => "compute");
-	$progress->pos(0);
  
 	my $gen = $self->generator;
-	$progress->target($gen->inmodel->size);
 
 	# Here, we take the data in the model we want to generate
 	# statistics for and we iterate over it. Doing it this way, we
@@ -130,9 +128,8 @@ sub BUILD {
 			$properties{$st->predicate->uri_value}{'countsubjects'}{$st->subject->sse} = 1;
 			$properties{$st->predicate->uri_value}{'countobjects'}{$st->object->sse} = 1;
 		}
-		$progress->update(message => "Triple examined");
+		$progress->update(message => "Examening triples");
 	});
-	$progress->finish;
 
 
 	# Finally, we update the attributes above, they are returned as a side-effect
@@ -145,6 +142,7 @@ sub BUILD {
 		$self->propertyPartitions(\%properties);
 		$self->classPartitions(\%classes);
 	}
+	$progress->update(message => "Data transfer");
 }
 
 =head1 FURTHER DOCUMENTATION

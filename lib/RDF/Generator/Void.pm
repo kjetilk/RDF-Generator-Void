@@ -11,6 +11,7 @@ use RDF::Generator::Void::Stats;
 # use less ();
 use utf8;
 use URI::Split qw(uri_split uri_join);
+use Progress::Any;
 
 use aliased 'RDF::Generator::Void::Meta::Attribute::ObjectList';
 
@@ -99,6 +100,9 @@ has dataset_uri => (
 						  builder  => '_build_dataset_uri',
 						  coerce   => 1,
 						 );
+
+my $progress = Progress::Any->get_indicator(task => "compute");
+
 
 # This will create a URN with a UUID by default
 sub _build_dataset_uri {
@@ -231,7 +235,9 @@ a model, one will be created for you.
 sub generate {
 	my $self = shift;
 	my $void_model = shift || RDF::Trine::Model->temporary_model;
-
+	$progress->pos(0);
+	$progress->target($self->inmodel->size + 10);
+	$progress->update(message => "Adding base statements");
 	local $self->{void_model} = $void_model;
 
 	# Start generating the actual VoID statements
@@ -260,7 +266,7 @@ sub generate {
 														 iri('http://www.w3.org/2000/01/rdf-schema#label'),
 													    literal("RDF::Generator::Void, Version $VERSION", 'en')));
 	}
-
+	$progress->update(message => "Adding base statements");
 
 	foreach my $endpoint ($self->all_endpoints) {
 		$void_model->add_statement(statement(
@@ -293,6 +299,7 @@ sub generate {
 													 literal($self->inmodel->size, undef, $xsd->integer),
 													));
 
+	$progress->update(message => "Adding base statements");
 	if ($self->has_urispace) {
 		$void_model->add_statement(statement(
 														 $self->dataset_uri,
@@ -302,6 +309,7 @@ sub generate {
 		return $void_model if ($self->has_level && ($self->level == 0));
 		$self->_generate_counts($void->entities, $self->stats->entities);
 	}
+
 
 	return $void_model if ($self->has_level && $self->level == 0);
 	$self->_generate_counts($void->distinctSubjects, $self->stats->subjects);
@@ -314,6 +322,8 @@ sub generate {
 
 	$self->_generate_propertypartitions;
 	$self->_generate_classpartitions;
+	$progress->update(message => "Finishing"); 
+
 	return $void_model;
 }
 
@@ -325,6 +335,7 @@ sub _generate_counts {
 																$predicate,
 																literal($count, undef, $xsd->integer),
 															  ));
+	$progress->update(message => "Adding counts statements");
 }
 
 sub _generate_propertypartitions {
@@ -353,7 +364,7 @@ sub _generate_propertypartitions {
 						 literal(scalar keys %{$counts->{'countobjects'}}, undef, $xsd->integer)));
 	 }
 
-		 
+	 $progress->update(message => "Adding property partition statements"); 
 
   }
 }
@@ -374,6 +385,7 @@ sub _generate_classpartitions {
     $self->{void_model}->add_statement(statement($blank,
 						 $void->triples,
 						 literal($count, undef, $xsd->integer)));
+	 $progress->update(message => "Adding class partition statements"); 
   }
 }
 
@@ -394,6 +406,8 @@ sub _generate_most_common_vocabs {
 																	iri($vocab),
 																  ));
 	}
+	$progress->update(message => "Adding vocabulary statements"); 
+	
 }
 
 
