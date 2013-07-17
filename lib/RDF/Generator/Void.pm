@@ -101,7 +101,7 @@ has dataset_uri => (
 						  coerce   => 1,
 						 );
 
-my $progress = Progress::Any->get_indicator(task => "compute");
+our $progress; # Declared for everything in here
 
 
 # This will create a URN with a UUID by default
@@ -235,6 +235,7 @@ a model, one will be created for you.
 sub generate {
 	my $self = shift;
 	my $void_model = shift || RDF::Trine::Model->temporary_model;
+	local $progress = Progress::Any->get_indicator(task => "compute");
 	$progress->pos(0);
 	$progress->target($self->inmodel->size + 10);
 	$progress->update(message => "Adding base statements");
